@@ -4,7 +4,10 @@ export const loginUser = async (credentials) => {
     setTimeout(() => {
       const fakeToken = 'header.payload.signature';
       localStorage.setItem('token', fakeToken);
-      resolve({ name: '테스트사용자', email: credentials.email });
+      resolve({
+        name: '테스트사용자',
+        email: credentials?.email ?? 'test@example.com',
+      });
     }, 300);
   });
 };
