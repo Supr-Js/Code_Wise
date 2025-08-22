@@ -1,0 +1,7 @@
+Flask==3.0.3
+Flask-Cors==4.0.1
+python-dotenv==1.0.1
+radon==6.0.1
+waitress==2.1.2
+# 선택: OpenAI/HF 등 모델 연동 시 사용 (원하면 주석 해제 후 설치)
+# openai>=1.35.7
