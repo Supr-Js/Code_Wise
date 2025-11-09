@@ -1,40 +1,32 @@
 // src/socket/stompClient.js
-import { Client } from "@stomp/stompjs";
-import SockJS from "sockjs-client";
+import { Client } from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
 
-/**
- * JWT가 있을 때 Authorization 헤더로 전달
- * - 구독: /topic/result
- * - 발행: /app/analyze
- */
+// 백엔드 엔드포인트가 /ws-stomp 로 확정됨
 export function buildStompClient(token) {
-  const url = process.env.REACT_APP_WS_URL; // http://54.180.142.101:8080/ws
+  const sockUrl =
+    process.env.REACT_APP_WS_URL ||
+    '/stomp'; // (로컬 개발에서 프록시 쓸 경우만 백업)
 
   const client = new Client({
-    // SockJS를 사용할 때 brokerURL은 설정하지 않고 webSocketFactory만 설정
-    webSocketFactory: () => new SockJS(url),
+    webSocketFactory: () => new SockJS(sockUrl),
     connectHeaders: token ? { Authorization: `Bearer ${token}` } : {},
-    reconnectDelay: 3000,
+    reconnectDelay: 5000,
     heartbeatIncoming: 10000,
     heartbeatOutgoing: 10000,
-    debug: (msg) => {
-      if (process.env.NODE_ENV === "development") {
-        console.log("[STOMP]", msg);
-      }
-    },
+    debug: () => {},
   });
 
   return client;
 }
 
-// 분석 요청 발행 헬퍼
 export function publishAnalyze(client, payload) {
   if (!client || !client.connected) {
-    console.warn("STOMP not connected");
+    console.warn('STOMP not connected');
     return;
   }
   client.publish({
-    destination: "/app/analyze",
-    body: JSON.stringify(payload), // { code, language }
+    destination: '/app/analyze',
+    body: JSON.stringify(payload),
   });
 }

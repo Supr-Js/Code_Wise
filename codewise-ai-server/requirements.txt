@@ -1,7 +1,11 @@
-Flask==3.0.3
-Flask-Cors==4.0.1
-python-dotenv==1.0.1
-radon==6.0.1
-waitress==2.1.2
-# 선택: OpenAI/HF 등 모델 연동 시 사용 (원하면 주석 해제 후 설치)
-# openai>=1.35.7
+fastapi==0.112.2          # (Flask 그대로 쓰면 유지, 여기선 추천만)
+uvicorn[standard]==0.30.6
+pydantic>=2.7
+openai>=1.40.0
+httpx>=0.27.0
+tenacity>=8.5.0
+python-dotenv>=1.0.1
+flask>=3.0.0
+flask-cors>=4.0.0
+gunicorn>=21.2
+python-3.11.9

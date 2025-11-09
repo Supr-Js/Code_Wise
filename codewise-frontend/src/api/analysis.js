@@ -1,6 +1,6 @@
-import http from "../utils/http";
+import api from "./http";
 
 export const analyzeCode = async ({ code, language = "auto" }) => {
-  const res = await http.post("/api/analyze", { code, language });
-  return res.data; // { result: ... }
+  const { data } = await api.post("/api/analyze", { code, language });
+  return data;
 };

@@ -1,27 +1,33 @@
 // codewise-frontend/src/setupProxy.js
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
+const BACKEND = 'http://54.180.142.101:8080'; // 백엔드 주소
+
 module.exports = function (app) {
-  // 모든 HTTP API는 /api로 호출 → 백엔드 루트로 넘김
+  // REST
   app.use(
     '/api',
     createProxyMiddleware({
-      target: 'http://54.180.142.101:8080',
+      target: BACKEND,
       changeOrigin: true,
-      pathRewrite: { '^/api': '' }, // ★ /api를 지워서 백엔드 루트로 전달
+      pathRewrite: { '^/api': '' },
       logLevel: 'debug',
     })
   );
 
-  // STOMP/SockJS 엔드포인트 프록시
+  // ✅ STOMP/SockJS는 /stomp 로 받고 → 백엔드의 /ws 로 전달
   app.use(
-    '/ws',
+    '/stomp',
     createProxyMiddleware({
-      target: 'http://54.180.142.101:8080',
+      target: BACKEND,
       changeOrigin: true,
       ws: true,
       secure: false,
+      pathRewrite: { '^/stomp': '/ws' },
       logLevel: 'debug',
     })
   );
+
+  // ❌ 아래처럼 '/ws' 를 직접 프록시하는 라인은 반드시 제거/주석
+  // app.use('/ws', ... )  <-- 제거!
 };

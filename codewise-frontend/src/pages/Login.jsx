@@ -1,7 +1,7 @@
 // src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { loginUser } from "../api/auth";
+import { loginUser, getGoogleLoginUrl } from "../api/auth";
 
 export default function Login() {
   const nav = useNavigate();
@@ -12,64 +12,121 @@ export default function Login() {
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
-
-    // 1) 클라이언트 검증: 비어있으면 API 호출 X
     if (!email || !password) {
       setError("이메일과 비밀번호를 입력해주세요.");
       return;
     }
-
     try {
-      // 2) 서버 호출
-      const data = await loginUser({ email, password }); // 200이어야 navigate
+      const data = await loginUser({ email, password });
       if (!data?.token) {
         setError("로그인 응답에 토큰이 없습니다.");
         return;
       }
-
-      // 3) 성공 시에만 이동
       nav("/editor", { replace: true });
     } catch (err) {
       setError(err.message || "로그인 실패");
     }
   };
 
+  const onGoogle = () => {
+    window.location.href = getGoogleLoginUrl();
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <form onSubmit={onSubmit} className="p-6 rounded-lg shadow w-96 bg-white">
-        <h2 className="text-xl font-bold mb-4 text-center">로그인</h2>
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      background: "linear-gradient(180deg,#eaf3ff 0%, #f6fbff 100%)"
+    }}>
+      <form
+        onSubmit={onSubmit}
+        style={{
+          width: 380,
+          background: "#fff",
+          borderRadius: 16,
+          boxShadow: "0 10px 24px rgba(0,0,0,.07)",
+          padding: 20
+        }}
+      >
+        <div style={{ display:"flex", gap:8, alignItems:"center", justifyContent:"center", marginBottom:6 }}>
+          <img src="/logo-ai.png" alt="logo" style={{ width: 28, height: 28, borderRadius: 6 }} />
+          <div style={{ fontWeight: 800, fontSize: 18 }}>CodeWise</div>
+        </div>
+        <div style={{ textAlign:"center", fontSize:12, color:"#6b7280", marginBottom:14 }}>AI Code Analysis</div>
 
         {error && (
-          <p className="text-red-600 text-sm mb-3 text-center">{error}</p>
+          <p style={{ color:"#dc2626", fontSize:12, textAlign:"center", marginBottom:10 }}>{error}</p>
         )}
 
         <input
           type="email"
           placeholder="이메일"
-          className="border rounded w-full p-2 mb-2"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           autoFocus
+          style={{
+            width:"100%", boxSizing:"border-box",
+            border:"1px solid #e5e7eb", borderRadius:12, padding:"10px 12px", marginBottom:8
+          }}
         />
         <input
           type="password"
           placeholder="비밀번호"
-          className="border rounded w-full p-2 mb-4"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          style={{
+            width:"100%", boxSizing:"border-box",
+            border:"1px solid #e5e7eb", borderRadius:12, padding:"10px 12px", marginBottom:12
+          }}
         />
 
+        {/* 로그인 / 회원가입 나란히 (반반) */}
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
+          <button
+            type="submit"
+            style={{
+              width:"100%", background:"#2563eb", color:"#fff",
+              border:"none", borderRadius:12, padding:"10px 0", fontWeight:700
+            }}
+          >
+            로그인
+          </button>
+
+          <button
+            type="button"
+            onClick={() => nav("/signup")}
+            style={{
+              width:"100%", background:"#f3f4f6", color:"#111827",
+              border:"1px solid #e5e7eb", borderRadius:12, padding:"10px 0", fontWeight:700
+            }}
+          >
+            회원가입
+          </button>
+        </div>
+
+        {/* Google 버튼 (아래 배치) */}
         <button
-          type="submit"
-          className="w-full bg-blue-600 text-white rounded py-2"
+          type="button"
+          onClick={onGoogle}
+          style={{
+            width:"100%", marginTop:10,
+            display:"flex", alignItems:"center", justifyContent:"center", gap:8,
+            background:"#fff", border:"1px solid #e5e7eb", borderRadius:12, padding:"10px 0"
+          }}
         >
-          로그인
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="" style={{ width:18, height:18 }}
+          />
+          Google 계정으로 로그인하기
         </button>
 
-        {/* 필요 시 구글 버튼은 주석/비활성화 */}
-        {/* <button type="button" className="w-full mt-3 border rounded py-2">
-          Google 계정으로 로그인
-        </button> */}
+        <hr style={{ border:"none", borderTop:"1px solid #eee", margin:"14px 0" }} />
+        <p style={{ textAlign:"center", fontSize:12, color:"#9ca3af" }}>
+          Single Sign-On은 관리자에게 문의하세요.
+        </p>
       </form>
     </div>
   );

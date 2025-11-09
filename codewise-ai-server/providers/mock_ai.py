@@ -1,99 +1,53 @@
-# providers/mock_ai.py
 from __future__ import annotations
-from typing import Dict, Any, List
 import re
+from typing import Dict, Any, List, Optional
 
-# radon으로 복잡도/MI 측정
-try:
-    from radon.complexity import cc_visit
-    from radon.metrics import mi_visit
-except Exception:
-    cc_visit = None
-    mi_visit = None
-
-
-def _simple_suggestions(code: str) -> List[Dict[str, Any]]:
-    suggestions = []
-    lines = code.splitlines()
-
-    for i, line in enumerate(lines, 1):
-        if len(line) > 120:
-            suggestions.append({
-                "line": i,
-                "severity": "info",
-                "message": "라인 길이가 120자를 초과합니다. 줄바꿈/가독성 개선을 고려하세요."
-            })
+def _simple_issues(code: str) -> List[Dict[str, Any]]:
+    issues = []
+    for i, line in enumerate(code.splitlines(), 1):
+        if re.search(r'\bprintf\s*\(', line) and ';' not in line:
+            issues.append({"line": i, "severity":"warn",
+                           "message":"세미콜론(;) 누락 가능성", "suggestion":"; 추가",
+                           "patch":""})
         if "TODO" in line or "FIXME" in line:
-            suggestions.append({
-                "line": i,
-                "severity": "warn",
-                "message": "TODO/FIXME 주석이 있습니다. 처리 계획을 확인하세요."
-            })
-        if re.match(r"^\s*print\s*\(", line):
-            suggestions.append({
-                "line": i,
-                "severity": "info",
-                "message": "print 사용 감지. 로깅 라이브러리 사용을 고려하세요."
-            })
-    return suggestions
+            issues.append({"line": i, "severity":"info",
+                           "message":"TODO/FIXME 주석 존재", "suggestion":"작업 계획 확인",
+                           "patch":""})
+    return issues
 
+def analyze(
+    code: str,
+    language: str = "auto",
+    submissionId: Optional[str] = None,
+    userId: Optional[str] = None,
+    **kwargs: Any,
+) -> Dict[str, Any]:
+    if not code or not code.strip():
+        raise ValueError("code is required")
 
-def analyze(code: str, language: str = "auto") -> Dict[str, Any]:
-    """
-    간단/결정적 분석(네트워크 호출 없음).
-    - LOC/빈줄/주석 추정
-    - Cyclomatic Complexity 평균/최대 (radon 사용)
-    - Maintainability Index (radon 사용)
-    - 간단한 제안 리스트
-    """
     lines = code.splitlines()
-    loc = len(lines)
-    blank = sum(1 for l in lines if not l.strip())
-    comments = sum(1 for l in lines if l.strip().startswith(("#", "//", "/*", "*", "--")))
-    todos = sum(1 for l in lines if "TODO" in l or "FIXME" in l)
-
-    avg_cc = None
-    max_cc = None
-    mi = None
-
-    if cc_visit:
-        try:
-            blocks = cc_visit(code)
-            if blocks:
-                vals = [b.complexity for b in blocks]
-                avg_cc = sum(vals) / len(vals)
-                max_cc = max(vals)
-        except Exception:
-            pass
-
-    if mi_visit:
-        try:
-            mi = mi_visit(code, True)  # multi=True
-            # 범위 0~100, 값이 높을수록 유지보수성 좋음
-        except Exception:
-            pass
-
-    suggestions = _simple_suggestions(code)
-
-    # 요약 메시지
-    summary = f"라인수 {loc}, 공백 {blank}, 주석 {comments}, TODO {todos}"
-    if avg_cc is not None:
-        summary += f", 평균 복잡도 {avg_cc:.2f}"
-    if mi is not None:
-        summary += f", MI {mi:.1f}"
+    issues = _simple_issues(code)
+    patch = ""
+    if issues:
+        patch = """--- original
++++ fixed
+@@ -1,1 +1,1 @@
+-printf("hello")
++printf("hello");
+"""
 
     return {
-        "mode": "mock",
+        "summary": f"라인수 {len(lines)}, 이슈 {len(issues)}건",
         "metrics": {
-            "loc": loc,
-            "blank": blank,
-            "comments": comments,
-            "todos": todos,
-            "avg_complexity": avg_cc,
-            "max_complexity": max_cc,
-            "maintainability_index": mi,
-            "language": language,
+            "loc": len(lines), "language": language,
+            "maintainability_index": None, "avg_complexity": None,
+            "mccabe_complexity": None, "blank": None, "comments": None,
+            "todos": None, "max_complexity": None
         },
-        "issues": suggestions,  # [{ line, severity, message }]
-        "summary": summary,
+        "issues": issues,
+        "fix": {"strategy": "patch" if issues else "none",
+                "patch": patch if issues else "", "fixed_code": "" if issues else code},
+        "source": "mock", "model": "mock",
+        **({"submissionId": submissionId} if submissionId is not None else {}),
+        **({"userId": userId} if userId is not None else {}),
     }

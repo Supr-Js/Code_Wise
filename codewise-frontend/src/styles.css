@@ -1,0 +1,148 @@
+/* src/styles.css (COPY 버튼 클릭 이슈 해결 · 마이페이지 visited 보라색 제거 · 최적코드 연하늘색 배경) */
+:root {
+  --card:#ffffff;
+  --border:#e5e7eb;
+  --muted:#6b7280;
+  --text:#111827;
+
+  --good-bg:#f0fdf4;
+  --good-border:#86efac;
+  --bad-bg:#fef2f2;
+  --bad-border:#fecaca;
+  --neutral-bg:#f9fafb;
+  --neutral-border:#e5e7eb;
+
+  --btn:#2563eb;
+  --btn-text:#ffffff;
+
+  /* 배지/상태 컬러 */
+  --err:#ef4444;
+  --warn:#f59e0b;
+  --info:#6366f1;
+
+  /* 최적 코드(연한 하늘색 톤) */
+  --best-bg:#eef6ff;        /* 배경 */
+  --best-fg:#0b1220;        /* 글자 */
+  --best-border:#dbeafe;    /* 테두리 */
+}
+
+/* ---- 레이아웃/공통 ---- */
+.layout{display:grid;grid-template-columns:1.1fr 1fr;gap:16px}
+.rightcol{display:grid;gap:16px}
+
+body{
+  background:linear-gradient(180deg,#edf6ff 0%,#f6f9fc 100%);
+  color:var(--text);
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,
+    Apple Color Emoji,Segoe UI Emoji,Noto Color Emoji,"Noto Sans KR",sans-serif;
+}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:0 4px 14px rgba(0,0,0,.04)}
+.pad{padding:16px}
+
+.cardbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.title{font-weight:700;margin-bottom:8px}
+.muted{color:var(--muted)}
+.muted.small{font-size:12px}
+.text{color:var(--text)}
+
+.input,.select{
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:14px;
+  outline:none;
+  background:#fff;
+}
+.input.editor{
+  width:100%;height:380px;resize:vertical;box-sizing:border-box;
+  font-family:ui-monospace,Menlo,Consolas,monospace
+}
+
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:10px}
+
+.btn{
+  background:var(--btn);border:none;color:var(--btn-text);
+  padding:10px 14px;border-radius:10px;font-size:14px;cursor:pointer;font-weight:600;
+}
+.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--border)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* Header의 마이페이지 링크: 방문 후에도 보라색 금지(로그아웃 글자색과 동일) */
+.linkbtn, .linkbtn:link, .linkbtn:visited { color:#111827; text-decoration:none; }
+
+/* 셀렉트/상태 라인 */
+.select{border:1px solid var(--border);border-radius:10px;padding:6px 10px}
+.control{display:flex;align-items:center;gap:6px}
+.label{font-size:12px;color:#6b7280;width:92px;text-align:right}
+.status{font-size:12px;color:#9ca3af}
+.row.between{display:flex;justify-content:space-between;align-items:center}
+.autoapply{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.notice{font-size:13px;color:var(--muted);border:1px dashed var(--border);border-radius:12px;padding:12px}
+
+/* ---- 메트릭 ---- */
+.grid-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.metric{background:var(--neutral-bg);border:1px solid var(--neutral-border);border-radius:10px;padding:10px;font-size:12px}
+.metric b{font-size:14px}
+@media (max-width:1024px){ .grid-metrics{grid-template-columns:repeat(2,1fr)} }
+
+/* ---- 배지 ---- */
+.badge{padding:4px 8px;border-radius:999px;font-size:11px;font-weight:700;color:#fff}
+.badge.err{background:var(--err)}
+.badge.warn{background:var(--warn);color:#111}
+.badge.info{background:var(--info)}
+
+/* ---- 이슈 카드 ---- */
+.issuegrid{display:grid;gap:12px}
+.card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.card-head .line{font-weight:700;font-size:14px}
+.blocktitle{font-weight:700;font-size:12px;margin:10px 0 6px}
+.blocktitle.good{color:#14532d}
+.blocktitle.bad{color:#7f1d1d}
+
+/* ---- 코드 스니펫(문제/수정 예시) ---- */
+.codewrap{
+  position:relative;border-radius:10px;border:1px solid var(--neutral-border);
+  background:var(--neutral-bg);padding:12px 96px 12px 12px;
+}
+.codewrap.good{background:var(--good-bg);border-color:var(--good-border)}
+.codewrap.bad{background:var(--bad-bg);border-color:var(--bad-border)}
+
+/* COPY 버튼 클릭 막힘 방지 (z-index/포인터 이벤트 명시) */
+.copybtn{
+  position:absolute;top:8px;right:8px;background:#111827;color:#fff;border:none;
+  border-radius:8px;padding:6px 10px;font-size:12px;line-height:1;
+  z-index:20; pointer-events:auto; cursor:pointer; user-select:none;
+}
+.copybtn:hover{filter:brightness(1.05)}
+.copybtn:active{transform:translateY(1px)}
+.copybtn:disabled{opacity:.5;cursor:not-allowed}
+
+.code{
+  font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+  white-space:pre-wrap;line-height:1.45;margin:0;user-select:text;
+}
+.code::selection{background:rgba(59,130,246,.28);color:inherit}
+.code *::selection{background:rgba(59,130,246,.28);color:inherit}
+
+/* ---- 최적 코드(전문) – 연한 하늘색 배경 ---- */
+.bestcode{
+  position:relative;border:1px solid var(--best-border);
+  background:var(--best-bg); color:var(--best-fg);
+  border-radius:12px; padding:14px 100px 14px 14px; overflow:auto;
+}
+.bestcode .copybtn{
+  background:#0f172a; color:#fff; border:1px solid rgba(0,0,0,.15);
+}
+.bestcode pre{
+  margin:0;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;
+  line-height:1.5;white-space:pre-wrap;word-break:break-word;
+}
+
+/* ---- 코드 툴바(선택) ---- */
+.code-toolbar{
+  display:flex;justify-content:flex-end;gap:6px;padding:6px 8px;
+  background:#0b1020;border-bottom:1px solid rgba(255,255,255,.06);
+  border-top-left-radius:10px;border-top-right-radius:10px;
+}
