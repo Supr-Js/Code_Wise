@@ -23,7 +23,7 @@ export default function Header({ right }) {
       <div style={{ display:"flex", alignItems:"center", gap:16 }}>
         <div>{right}</div>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          {/* 보라색 방지 + 로그아웃과 동일한 글자색 */}
+          {/* 글자색 통일 */}
           <Link
             to="/mypage"
             className="linkbtn"
@@ -32,7 +32,7 @@ export default function Header({ right }) {
               border:"1px solid #e5e7eb",
               borderRadius:12,
               background:"#fff",
-              color:"#111827",            // 로그아웃 글자색과 동일
+              color:"#111827",            // 글자색과 통일
               textDecoration:"none"
             }}
           >

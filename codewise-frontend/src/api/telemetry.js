@@ -1,7 +1,7 @@
 // src/api/telemetry.js
 import api from "./http";
 
-/** 허용 목록 */
+/** 허용 부분*/
 const PURPOSE_ALLOW = {
   auto: true,
   general_refactor: true,
@@ -16,7 +16,7 @@ const LANG_ALLOW = {
   csharp: true, php: true, ruby: true,
 };
 
-/** CRA/Webpack 호환: import.meta 사용 금지 */
+/** CRA/Webpack 호환: import.meta 금지 */
 const DEV =
   typeof process !== "undefined" &&
   process.env &&
@@ -58,7 +58,7 @@ function normErrors(list) {
 
 /**
  * 분석 히스토리 저장 (POST /user/history)
- * 프론트의 응답 흐름을 막지 않도록 호출부에서 await 하지 않는 것을 권장.
+ * 프론트의 응답 흐름 위해 호출부 await 피하기
  */
 export async function saveAnalysisHistory({
   language,
@@ -73,7 +73,7 @@ export async function saveAnalysisHistory({
     createdAt: toLocalIsoNoTZ(createdAt),
   };
 
-  // 멱등 키(선택): 백엔드에서 헤더를 읽어 중복 삽입 방지 가능
+  // 백엔드에서 헤더를 읽어 중복 삽입 방지
   const headers = { "X-Idempotency-Key": `${Date.now()}-${Math.random().toString(36).slice(2, 10)}` };
 
   try {
@@ -86,7 +86,7 @@ export async function saveAnalysisHistory({
         err?.response?.data || err?.message || err
       );
     }
-    // 실패는 UI 차단 사유가 아님
+    // UI 차단 사유가 체크
   }
 }
 

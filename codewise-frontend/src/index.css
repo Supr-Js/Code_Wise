@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 필요하면 베이스 보정 */
+/* 필요 시 베이스 보정 */
 @layer base {
   html, body, #root { height: 100%; }
 }

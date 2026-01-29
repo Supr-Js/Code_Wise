@@ -41,13 +41,13 @@ export async function deleteMe() {
   return data; // "회원 탈퇴가 완료되었습니다."
 }
 
-// Google OAuth 시작 URL (백엔드가 리다이렉트 처리 → /oauth2/redirect?token=.. 로 돌아옴)
+// Google OAuth 시작 URL (백엔드에서 리다이렉트 처리)
 export function getGoogleLoginUrl() {
-  // 절대 URL을 .env에서 직접 주입 (주석/공백 금지)
+  // URL을 .env에서 직접 주입
   const abs = process.env.REACT_APP_OAUTH_AUTHORIZE_ABS;
   if (abs && /^https?:\/\//.test(abs)) return abs;
 
-  // 백업: BASE + 표준 경로 조합
+  // 백업 부분 BASE + 표준 경로 조합
   const base = (process.env.REACT_APP_API_BASE_URL || "").replace(/\/$/, "");
   return `${base}/oauth2/authorization/google`;
 }

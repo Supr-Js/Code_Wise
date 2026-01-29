@@ -15,7 +15,7 @@ module.exports = function (app) {
     })
   );
 
-  // ✅ STOMP/SockJS는 /stomp 로 받고 → 백엔드의 /ws 로 전달
+  // STOMP/SockJS /stomp 로 받고 → 백엔드의 /ws 로
   app.use(
     '/stomp',
     createProxyMiddleware({
@@ -28,6 +28,4 @@ module.exports = function (app) {
     })
   );
 
-  // ❌ 아래처럼 '/ws' 를 직접 프록시하는 라인은 반드시 제거/주석
-  // app.use('/ws', ... )  <-- 제거!
 };

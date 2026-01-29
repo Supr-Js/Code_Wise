@@ -2,7 +2,7 @@
 import api from "./http";
 
 /**
- * 백엔드 HistoryController.getUserStats() 연동:
+ * 백엔드 HistoryController.getUserStats() 연동 기대
  * GET /user/history/stats  → { topLanguages:[{language,count}], topPurposes:[{purpose,count}], topErrors:[{error,count}] }
  */
 export async function getUserStats() {

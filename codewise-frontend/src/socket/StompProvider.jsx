@@ -80,7 +80,7 @@ export default function StompProvider({ children }) {
                 }))
               : [];
 
-            // 저장 실패는 UI 차단하지 않음
+            // 저장 실패 UI 차단 안 함
             saveAnalysisHistory({ language: lang, purpose: finalPurpose, errors });
           } catch (e) {
             if (process.env.NODE_ENV === "development") {

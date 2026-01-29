@@ -6,11 +6,11 @@ const api = axios.create({
   timeout: 10000,
 });
 
-// 요청마다 JWT 자동 첨부(있을 때만)
+// 요청시 JWT 자동 첨부
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
   if (token) config.headers.Authorization = `Bearer ${token}`;
-  // JSON 전송 명시(혹시 누락 방지)
+  // JSON 누락 방지 위한 전송 명시
   if (!config.headers["Content-Type"]) {
     config.headers["Content-Type"] = "application/json";
   }

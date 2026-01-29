@@ -82,7 +82,7 @@ export default function Login() {
           }}
         />
 
-        {/* 로그인 / 회원가입 나란히 (반반) */}
+        {/* 로그인 / 회원가입 */}
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:10 }}>
           <button
             type="submit"
@@ -106,7 +106,7 @@ export default function Login() {
           </button>
         </div>
 
-        {/* Google 버튼 (아래 배치) */}
+        {/* Google 버튼 */}
         <button
           type="button"
           onClick={onGoogle}
