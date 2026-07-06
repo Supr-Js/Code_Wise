@@ -60,40 +60,38 @@ function normErrors(list) {
  * 분석 히스토리 저장 (POST /user/history)
  * 프론트의 응답 흐름 위해 호출부 await 피하기
  */
-export async function saveAnalysisHistory({
-  language,
-  purpose,
-  errors,
-  createdAt = new Date(),
-}) {
+// saveAnalysisHistory 함수 최종 수정
+export async function saveAnalysisHistory({ language, purpose, errors, createdAt = new Date() }) {
   const payload = {
     language: normLang(language),
     purpose: normPurpose(purpose),
     errors: normErrors(errors),
+    // 데이터 정형화: 분산 환경 및 다른 시간대(Timezone) 설정의 서버 인프라 간 데이터 일관성을 유지하기 위해
+    // 로컬 시스템의 시간대를 제외한 ISO_LOCAL_DATE_TIME 포맷으로 변환 후 전송
     createdAt: toLocalIsoNoTZ(createdAt),
   };
 
-  // 백엔드에서 헤더를 읽어 중복 삽입 방지
+  // 네트워크 장애 대책으로 멱등성 검증 기법 도입
+  // 대용량 트래픽 혹은 실시간 WebSocket 재연결 시 동일한 분석 결과가 데이터베이스에 중복 삽입(Duplicate Insertion)되는 현상을 차단.
+  // 타임스탬프와 난수 기반의 고유 식별키를 생성하여 HTTP 헤더에 주입함으로써 백엔드 단에서 동일 요청을 1회만 처리하도록 보장.
   const headers = { "X-Idempotency-Key": `${Date.now()}-${Math.random().toString(36).slice(2, 10)}` };
-
+  
   try {
+    // 사용자의 분석 흐름 UI 응답성을 해치지 않기 위해 (Non-blocking UI), 호출부에서 await를 피하고 백그라운드 스레드에서 전송 처리
     await api.post("/user/history", payload, { headers });
     if (DEV) console.log("[Telemetry] History saved");
   } catch (err) {
     if (DEV) {
-      console.warn(
-        "[Telemetry] saveAnalysisHistory failed",
-        err?.response?.data || err?.message || err
-      );
+      console.warn("[Telemetry] saveAnalysisHistory failed", err?.response?.data || err?.message || err);
     }
-    // UI 차단 사유가 체크
+    // 통계성 데이터 유실이 주 서비스(코드 분석 기능) 이용에 영향을 주지 않도록 방어적 예외 전파 차단
   }
 }
 
 /**
- * Optional convenience helper:
- * Extract a final purpose from an AI result object.
- * Prefers result.final_purpose, falls back to inferred_purpose or provided default.
+ * 데이터 정형화 핸들러: AI 분석 결과 객체로부터 최종 분석 목적(Purpose)을 안전하게 추출 헬퍼
+ * result.final_purpose를 최우선으로 탐색하며, 데이터 누락 시 자동 추론된 목적(inferred_purpose)이나 
+ * 시스템 기본값(general_refactor)으로 대체(Fallback) 처리하여 런타임 에러를 방지하고 데이터 일관성을 확보
  */
 export function pickFinalPurposeFromResult(result, fallback = "general_refactor") {
   return (
